@@ -34,6 +34,9 @@ th{text-align:left;padding:5px 7px;border-bottom:1px solid #E5E7EB;font-weight:5
 td{padding:4px 6px;border-bottom:1px solid #F3F4F6;vertical-align:middle}
 td input{padding:3px 5px;font-size:11px;border:1px solid #E5E7EB}
 td input:focus{border-color:#1E3A5F;outline:none}
+/* ช่องรายละเอียด: ตัดบรรทัดอัตโนมัติ แสดงข้อความครบทุกตัวอักษร */
+td textarea.desc{padding:3px 5px;font-size:11px;border:1px solid #E5E7EB;border-radius:3px;font-family:inherit;line-height:1.45;resize:vertical;overflow:hidden;display:block;min-height:22px}
+td textarea.desc:focus{border-color:#1E3A5F;outline:none}
 .search-wrap{position:relative}
 .dd{position:absolute;top:calc(100% + 2px);left:0;right:0;background:#fff;border:1px solid #C7D2E7;border-radius:8px;max-height:280px;overflow-y:auto;z-index:999;display:none;box-shadow:0 6px 20px rgba(0,0,0,.12)}
 .dd.open{display:block}
@@ -144,7 +147,7 @@ td input:focus{border-color:#1E3A5F;outline:none}
     <thead><tr>
       <th style="width:26px">#</th>
       <th style="min-width:110px">รหัสสินค้า</th>
-      <th style="min-width:190px">รายละเอียด</th>
+      <th style="min-width:250px">รายละเอียด</th>
       <th style="width:80px">หน่วย</th>
       <th style="width:90px">ราคา/หน่วย</th>
       <th style="width:60px">จำนวน</th>
@@ -548,7 +551,7 @@ function render(){
       +'<td style="color:#9CA3AF">'+(i+1)+'</td>'
       +'<td><div style="display:flex;align-items:center;gap:2px">'
         +'<input value="'+esc(it.code)+'" onchange="upd('+it.id+',\'code\',this.value)" style="width:90px"/>'+badge+'</div></td>'
-      +'<td><input value="'+esc(it.desc)+'" onchange="upd('+it.id+',\'desc\',this.value)" style="width:185px"/></td>'
+      +'<td><textarea class="desc" rows="1" onchange="upd('+it.id+',\'desc\',this.value)" oninput="autoGrow(this)" onkeydown="if(event.key===\'Enter\'){event.preventDefault();this.blur();}" style="width:100%;min-width:230px;box-sizing:border-box">'+esc(it.desc)+'</textarea></td>'
       +'<td>'      +'<input value="'+esc(it.unit)+'" list="unit-list-'+it.id+'" '      +'onchange="upd('+it.id+',\'unit\',this.value)" '      +'style="width:78px" placeholder="หน่วย"/>'      +'<datalist id="unit-list-'+it.id+'">'      +'<option value="M">'      +'<option value="CM">'      +'<option value="PCS">'      +'<option value="SET">'      +'<option value="KG">'      +'<option value="ROLL">'      +'<option value="ROLL(1M)">'      +'<option value="ROLL(50M)">'      +'<option value="ROLL(100M)">'      +'<option value="BOX">'      +'<option value="PAIR">'      +'</datalist>'      +'</td>'
       +(it.isDelivery
         ? '<td><select onchange="upd('+it.id+',\'price\',+this.value)" style="width:90px;padding:3px 4px;font-size:11px">'          +[93.46,112.15,140.19,168.22,186.92,233.64].map(v=>'<option value="'+v+'"'+(it.price==v?' selected':'')+'>฿'+v.toFixed(2)+'</option>').join('')          +'</select></td>'        : '<td><input type="number" value="'+it.price+'" onchange="upd('+it.id+',\'price\',+this.value)" style="width:82px'+(it.noPrice&&it.price===0?';border-color:#D97706;background:#FFFBEB':'')+'"/></td>')
@@ -562,8 +565,12 @@ function render(){
       +'<td><button class="btn-del" onclick="delRow('+it.id+')">✕</button></td>'
       +'</tr>';
   }).join('');
+  // ปรับความสูงช่องรายละเอียดให้พอดีข้อความ (แสดงครบทุกตัวอักษร)
+  [].forEach.call(document.querySelectorAll('#tbody textarea.desc'), autoGrow);
   summary();
 }
+// ขยายความสูง textarea ตามเนื้อหา
+function autoGrow(el){ if(!el) return; el.style.height='auto'; el.style.height=(el.scrollHeight+2)+'px'; }
 function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 function upd(id,f,v){const it=items.find(x=>x.id===id);if(it){it[f]=v;render();}}
 function parseDisc(v) {
